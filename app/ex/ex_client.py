@@ -343,40 +343,26 @@ class ExtendedClient:
             return []
         
         try:
-            # Map interval to Extended candle type
-            # Extended uses: PT1M, PT5M, PT15M, PT30M, PT1H, PT4H, PT24H
+            # Map interval to Extended SDK CandleInterval type
+            # SDK uses: PT1M, PT5M, PT15M, PT30M, PT1H, PT2H, PT4H, P1D
             interval_map = {
                 '1m': 'PT1M',
                 '5m': 'PT5M',
                 '15m': 'PT15M',
                 '30m': 'PT30M',
                 '1h': 'PT1H',
+                '2h': 'PT2H',
                 '4h': 'PT4H',
-                '1d': 'PT24H',
+                '1d': 'P1D',
             }
             candle_interval = interval_map.get(interval, 'PT1M')
             
-            # Calculate time range
-            now_ms = int(time.time() * 1000)
-            interval_ms_map = {
-                '1m': 60 * 1000,
-                '5m': 5 * 60 * 1000,
-                '15m': 15 * 60 * 1000,
-                '30m': 30 * 60 * 1000,
-                '1h': 60 * 60 * 1000,
-                '4h': 4 * 60 * 60 * 1000,
-                '1d': 24 * 60 * 60 * 1000,
-            }
-            interval_ms = interval_ms_map.get(interval, 60 * 1000)
-            start_time = now_ms - (limit * interval_ms)
-            
-            # Fetch candles using REST API
-            response = await self.trading_client.info.get_candles(
-                market=symbol,
+            # Fetch candles using markets_info module (correct SDK method)
+            # SDK method: get_candles_history(market_name, candle_type, interval, limit, end_time)
+            response = await self.trading_client.markets_info.get_candles_history(
+                market_name=symbol,
                 candle_type='trades',
                 interval=candle_interval,
-                start_time=start_time,
-                end_time=now_ms,
                 limit=limit,
             )
             
